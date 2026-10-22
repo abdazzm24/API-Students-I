@@ -111,7 +111,13 @@ func main() {
 		repository.NewTokenRepository(pool)
 
 	roleRepository :=
-		repository.NewRoleRepository(pool)
+	repository.NewRoleRepository(pool)
+
+	supervisionRepository :=
+		repository.NewSupervisionRepository(pool)
+
+	txManager :=
+		repository.NewTxManager(pool)
 
 	// ========================================================
 	// 7. LOAD RBAC PERMISSIONS
@@ -179,6 +185,12 @@ func main() {
 			) * 24 * time.Hour,
 		)
 
+	supervisionService :=
+		service.NewSupervisionService(
+			supervisionRepository,
+			txManager,
+		)
+
 	// ========================================================
 	// 9. APP
 	// ========================================================
@@ -200,6 +212,9 @@ func main() {
 
 			AuthService:
 				authService,
+
+			SupervisionService:
+				supervisionService,
 		},
 	)
 

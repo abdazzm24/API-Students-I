@@ -21,6 +21,8 @@ type Dependencies struct {
 	UserService *service.UserService
 
 	AuthService *service.AuthService
+
+	SupervisionService *service.SupervisionService
 }
 
 func Register(
@@ -211,5 +213,54 @@ func Register(
 		"/:id",
 		middleware.RequireJSON,
 		deps.StudentService.Patch,
+	)
+
+	supervisors := api.Group(
+		"/supervisors",
+		middleware.RequireAuth(deps.JWT),
+	)
+
+	supervisors.Get(
+		"/",
+		middleware.RequirePermission(
+			deps.Permissions,
+			"supervision:manage",
+		),
+		deps.SupervisionService.List,
+	)
+
+	supervisors.Post(
+		"/:id/assign",
+		middleware.RequireJSON,
+		middleware.RequirePermission(
+			deps.Permissions,
+			"supervision:manage",
+		),
+		deps.SupervisionService.Assign,
+	)
+
+	supervisors.Patch(
+		"/:id",
+		middleware.RequireJSON,
+		middleware.RequirePermission(
+			deps.Permissions,
+			"supervision:manage",
+		),
+		deps.SupervisionService.Update,
+	)
+
+	supervisions := api.Group(
+		"/supervisions",
+		middleware.RequireAuth(deps.JWT),
+		middleware.RequireJSON,
+		middleware.RequirePermission(
+			deps.Permissions,
+			"supervision:manage",
+		),
+	)
+
+	supervisions.Post(
+		"/switch",
+		deps.SupervisionService.Switch,
 	)
 }
